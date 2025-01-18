@@ -57,6 +57,9 @@ int main(int argc, char **argv) {
                 });
 
   stbi_image_free(image);
-  stbi_write_png(output_filename, width, height, gray_channels,
-                 gray_image.data(), width * gray_channels);
+  if (!stbi_write_png(output_filename, width, height, gray_channels,
+                      gray_image.data(), width * gray_channels)) {
+    std::cerr << "Failed to write output image!\n";
+    return 1;
+  }
 }
