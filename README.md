@@ -7,13 +7,13 @@ Script to discard color channels and leave only one (or two, if there was transp
 Will compile in unix linux/macos, but no platforme-dependend code is used, so windows compilation script is welcomed in PR!
 (not sure about mac os, but have no machine to check)
 
-**Requirenments**: C++ compiler that supports c++17
+**Requirenments**: C++ compiler that supports c++17 standard
 
 ## Instructions for linux/macos systems:
 
 **Clone & Build**:
 ```sh
-git clone git@github.com:pppppptttttt/no-colors-img.git
+git clone https://github.com/pppppptttttt/no-colors-img.git
 cd no-colors-img
 make
 ```
