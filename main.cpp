@@ -1,3 +1,10 @@
+/*
+ * Discard image colors script, e.g. convert it to 1 (or 2 if it there was
+ * transparancy) channel image.
+ * Usage: ./no-colors-img <path/to/image>
+ * <path/to/output>
+ */
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
