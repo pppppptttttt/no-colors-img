@@ -45,16 +45,17 @@ int main(int argc, char **argv) {
   std::vector<std::size_t> indices(width * height);
   std::iota(indices.begin(), indices.end(), 0);
 
-  std::for_each(std::execution::par, indices.begin(), indices.end(),
-                [&](std::size_t idx) {
-                  std::size_t i = idx * gray_channels;
-                  std::size_t j = idx * channels;
-                  gray_image[i] = static_cast<std::uint8_t>(
-                      (image[j] + image[j + 1] + image[j + 2]) / 3.0L);
-                  if (gray_channels == 2) {
-                    gray_image[i + 1] = image[j + 3];
-                  }
-                });
+  std::for_each(
+      std::execution::par, indices.begin(), indices.end(),
+      [gray_channels, channels, &gray_image, &image](std::size_t idx) {
+        std::size_t i = idx * gray_channels;
+        std::size_t j = idx * channels;
+        gray_image[i] = static_cast<std::uint8_t>(
+            (image[j] + image[j + 1] + image[j + 2]) / 3.0L);
+        if (gray_channels == 2) {
+          gray_image[i + 1] = image[j + 3];
+        }
+      });
 
   stbi_image_free(image);
   if (!stbi_write_png(output_filename, width, height, gray_channels,
