@@ -1,22 +1,22 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb_image.h" // for stbi_image_free, stbi_load
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb_image_write.h" // for stbi_write_png
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <execution>
-#include <iostream>
-#include <numeric>
-#include <vector>
+#include <algorithm> // for for_each
+#include <cstddef>   // for size_t
+#include <cstdint>   // for uint8_t
+#include <execution> // for execution::par
+#include <iostream>  // for basic_ostream, operator<<
+#include <limits>    // for numeric_limits
+#include <numeric>   // for iota
+#include <vector>    // for vector
 
 int main(int argc, char **argv) {
   if (argc != 3) {
     std::cerr << "Usage: " << argv[0] << " <path/to/image> <path/to/output>\n";
-    std::exit(0);
+    return 0;
   }
 
   const char *filename = argv[1];
@@ -28,14 +28,28 @@ int main(int argc, char **argv) {
   std::uint8_t *image =
       stbi_load(filename, &width, &height, &channels, STBI_default);
 
-  if (channels == 1 || channels == 2) {
-    std::cerr << "Image is already gray!\n";
-    std::exit(0);
-  }
-
   if (image == nullptr) {
     std::cerr << "Failed to load image!\n";
-    std::exit(1);
+    stbi_image_free(image);
+    return 1;
+  }
+
+  if (width <= 0 || height <= 0 || channels < 1 || channels > 4) {
+    std::cerr << "Invalid image!\n";
+    stbi_image_free(image);
+    return 1;
+  }
+
+  if (channels == 1 || channels == 2) {
+    std::cerr << "Image is already gray!\n";
+    stbi_image_free(image);
+    return 0;
+  }
+
+  if (std::numeric_limits<int>::max() / height / channels < width) {
+    std::cerr << "Image is too large!\n";
+    stbi_image_free(image);
+    return 1;
   }
 
   const int gray_channels = channels == 4 ? 2 : 1;
@@ -46,10 +60,10 @@ int main(int argc, char **argv) {
   std::iota(indices.begin(), indices.end(), 0);
 
   std::for_each(
-      std::execution::par, indices.begin(), indices.end(),
+      std::execution::par, indices.cbegin(), indices.cend(),
       [gray_channels, channels, &gray_image, &image](std::size_t idx) {
-        std::size_t i = idx * gray_channels;
-        std::size_t j = idx * channels;
+        const std::size_t i = idx * gray_channels;
+        const std::size_t j = idx * channels;
         gray_image[i] = static_cast<std::uint8_t>(
             (image[j] + image[j + 1] + image[j + 2]) / 3.0L);
         if (gray_channels == 2) {
